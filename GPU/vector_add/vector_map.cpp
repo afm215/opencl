@@ -89,67 +89,23 @@ int main()
 
 
 //--------------------------------------------------------------------
-const unsigned N = 500000;
-timespec timer;
-double beg ;
-double finish ;
-double nanodiff;
-float flops;
-
-printf("\n");
-   printf("\n");
-   printf("_______________CPU stats_____________ \n");
-clock_gettime(CLOCK_REALTIME, &timer);
-  beg = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
-
-float *input_a=(float *) malloc(sizeof(float)*N);
-float *input_b=(float *) malloc(sizeof(float)*N);
-float *output=(float *) malloc(sizeof(float)*N);
+const unsigned N = 5000000;
+float *input_a;
+float *input_b;
+float *output;
 float *ref_output=(float *) malloc(sizeof(float)*N);
-
-clock_gettime(CLOCK_REALTIME, &timer);
-  finish = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
-  nanodiff = finish - beg;
-  printf("CPU buffer creation without mapping took %lf nanoseconds to run.\n", nanodiff);
-
 cl_mem input_a_buf; // num_devices elements
 cl_mem input_b_buf; // num_devices elements
 cl_mem output_buf; // num_devices elements
 int status;
-  clock_gettime(CLOCK_REALTIME, &timer);
-  beg = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
+int errcode;
 
-	for(unsigned j = 0; j < N; ++j) {
-	      input_a[j] = rand_float();
-	      input_b[j] = rand_float();
-	      //printf("ref %f\n",ref_output[j]);
-	    }
-  
-  clock_gettime(CLOCK_REALTIME, &timer);
-  finish = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
-  nanodiff = finish - beg;
-  printf("CPU buffer input initialization took %lf nanoseconds to run.\n", nanodiff);
-
-  clock_gettime(CLOCK_REALTIME, &timer);
-  beg = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
-  
-  for(unsigned j = 0; j < N; ++j) {
-    ref_output[j] = input_a[j] + input_b[j];
-    //printf("ref %f\n",ref_output[j]);
-  }
-  
-  clock_gettime(CLOCK_REALTIME, &timer);
-  finish = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
-  nanodiff = finish - beg;
-  printf("CPU took %lf nanoseconds to run.\n", nanodiff);
-  flops = N; 
-  flops /= (nanodiff); 
-  printf("CPU has %.6f Flops \n", flops);
-  flops*= pow(10,-6);
-  printf("CPU has %.6f Mflops \n", flops);
-  printf("\n");
-  printf("\n");
-
+	//time_t start,end;
+  timespec timer;
+  double beg ;
+  double finish ;
+  double nanodiff;
+  float flops;
 
 
     
@@ -161,7 +117,6 @@ int status;
      clGetPlatformInfo(platform, CL_PLATFORM_VERSION, STRING_BUFFER_LEN, char_buffer, NULL);
      printf("%-40s = %s\n\n", "CL_PLATFORM_VERSION ", char_buffer);
 
-    
      context_properties[1] = (cl_context_properties)platform;
      clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
      context = clCreateContext(context_properties, 1, &device, NULL, NULL, NULL);
@@ -177,55 +132,90 @@ int status;
      int success=clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
 	 if(success!=CL_SUCCESS) print_clbuild_errors(program,device);
      kernel = clCreateKernel(program, "vector_add", NULL);
- // Input buffers.
- printf("\n");
-    printf("\n");
-    printf("_______________GPU stats_____________ \n");
-    
-  clock_gettime(CLOCK_REALTIME, &timer);
+
+  printf("\n");
+   printf("\n");
+   printf("_______________Buffer stats_____________ \n");
+    clock_gettime(CLOCK_REALTIME, &timer);
     beg = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
+    //shared memory allows shared buffer (sort of)
+    input_a_buf = clCreateBuffer(context, CL_MEM_ALLOC_HOST_PTR, N*sizeof(float), NULL, &status);
+    checkError(status, "Fail to create buffer for input A");
 
-    input_a_buf = clCreateBuffer(context, CL_MEM_READ_ONLY,
-       N* sizeof(float), NULL, &status);
-    checkError(status, "Failed to create buffer for input A");
+    input_b_buf = clCreateBuffer(context, CL_MEM_ALLOC_HOST_PTR, N*sizeof(float), NULL, &status);
+    checkError(status, "Fail to create buffer for input B");
 
-    input_b_buf = clCreateBuffer(context, CL_MEM_READ_ONLY,
-        N* sizeof(float), NULL, &status);
-    checkError(status, "Failed to create buffer for input B");
-
-    // Output buffer.
-    output_buf = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
-        N* sizeof(float), NULL, &status);
-    checkError(status, "Failed to create buffer for output");
+    output_buf = clCreateBuffer(context, CL_MEM_ALLOC_HOST_PTR, N*sizeof(float), NULL, &status);
+    checkError(status, "Fail to create buffer for output");
     clock_gettime(CLOCK_REALTIME, &timer);
     finish = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
     nanodiff = finish - beg;
-    printf("Buffer creation took %lf nanoseconds to run.\n", nanodiff);
+    printf("GPU buffer creation took %lf nanoseconds to run.\n", nanodiff);
 
-
+    // for(unsigned j = 0; j < N; ++j) {
+	  //     input_a[j] = rand_float();
+	  //     input_b[j] = rand_float();
+	  //     //printf("ref %f\n",ref_output[j]);
+	  //   }
 
     // Transfer inputs to each device. Each of the host buffers supplied to
     // clEnqueueWriteBuffer here is already aligned to ensure that DMA is used
     // for the host-to-device transfer.
     cl_event write_event[2];
-	cl_event kernel_event,finish_event;
-  
+    
     clock_gettime(CLOCK_REALTIME, &timer);
     beg = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
 
-    status = clEnqueueWriteBuffer(queue, input_a_buf, CL_FALSE,
-        0, N* sizeof(float), input_a, 0, NULL, &write_event[0]);
-    checkError(status, "Failed to transfer input A");
+    input_a = (float* ) clEnqueueMapBuffer(queue, input_a_buf, CL_TRUE, CL_MAP_WRITE,0,N* sizeof(float),0,NULL,&write_event[0],&errcode);
+    checkError(errcode, "Failed to map input A");
 
-    status = clEnqueueWriteBuffer(queue, input_b_buf, CL_FALSE,
-        0, N* sizeof(float), input_b, 0, NULL, &write_event[1]);
-    checkError(status, "Failed to transfer input B");
-    clWaitForEvents(2, write_event);
+    input_b = (float* ) clEnqueueMapBuffer(queue, input_b_buf, CL_TRUE, CL_MAP_WRITE,0,N* sizeof(float),0,NULL,&write_event[1],&errcode);
+    checkError(errcode, "Failed to map input B");
+
+    output = (float* ) clEnqueueMapBuffer(queue, output_buf, CL_TRUE, CL_MAP_READ,0,N* sizeof(float),0,NULL,NULL,&errcode);
+    checkError(errcode, "Failed to map output");
+
     clock_gettime(CLOCK_REALTIME, &timer);
     finish = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
     nanodiff = finish - beg;
-    printf("Buffer copy without mapping took %lf nanoseconds to run.\n", nanodiff);
-    // Set kernel arguments.
+    printf("CPU buffer mapping took %lf nanoseconds to run.\n", nanodiff);
+
+  clWaitForEvents(2, write_event);
+
+  clock_gettime(CLOCK_REALTIME, &timer);
+    beg = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
+
+  for(unsigned j = 0; j < N; ++j) {
+      input_a[j] = rand_float();
+      input_b[j] = rand_float();
+      //printf("ref %f\n",ref_output[j]);
+    }
+    clock_gettime(CLOCK_REALTIME, &timer);
+    finish = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
+    nanodiff = finish - beg;
+    printf("CPU AND GPU buffer initialization took %lf nanoseconds to run.\n", nanodiff);
+  clock_gettime(CLOCK_REALTIME, &timer);
+  beg = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
+  for(unsigned j = 0; j < N; ++j) {
+    ref_output[j] = input_a[j] + input_b[j];
+    //printf("ref %f\n",ref_output[j]);
+  }
+  clock_gettime(CLOCK_REALTIME, &timer);
+  finish = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
+  nanodiff = finish - beg;
+  //printf("Time get %ld \n",finish);
+  printf("\n");
+   printf("\n");
+   printf("_______________CPU stats_____________ \n");
+  printf("CPU took %lf nanoseconds to run with map.\n", nanodiff);
+  flops = N; 
+  flops /= (nanodiff); 
+   printf("CPU has %0.6f FLOPS \n", flops);
+   flops *= pow(10,-6);
+  printf("CPU has %.6f MFLOPS \n", flops);
+
+	cl_event kernel_event; //, finish_event;
+  
     unsigned argi = 0;
 
     status = clSetKernelArg(kernel, argi++, sizeof(cl_mem), &input_a_buf);
@@ -238,26 +228,35 @@ int status;
     checkError(status, "Failed to set argument 3");
     
     const size_t global_work_size = N;
+    clock_gettime(CLOCK_REALTIME, &timer);
+    beg = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
+    //unmap buffer
+    clEnqueueUnmapMemObject(queue,input_a_buf,input_a,0,NULL,NULL);
+    clEnqueueUnmapMemObject(queue,input_b_buf,input_b,0,NULL,NULL);
+
     status = clEnqueueNDRangeKernel(queue, kernel, 1, NULL,
         &global_work_size, NULL, 2, write_event, &kernel_event);
     checkError(status, "Failed to launch kernel");
 
     
     clWaitForEvents(1, &kernel_event);
-    clock_gettime(CLOCK_REALTIME, &timer);
-    beg = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
+    
     // Read the result. This the final operation.
-    status = clEnqueueReadBuffer(queue, output_buf, CL_TRUE,
-        0, N* sizeof(float), output, 1, &kernel_event, &finish_event);
+    //status = clEnqueueReadBuffer(queue, output_buf, CL_TRUE,
+    //     0, N* sizeof(float), output, 1, &kernel_event, &finish_event);
    clock_gettime(CLOCK_REALTIME, &timer);
    finish = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
+   //diff = difftime (end,start);
    nanodiff = finish - beg ;
    flops = N;
    flops /= (nanodiff);
+   printf("\n");
+   printf("\n");
+   printf("_______________GPU stats_____________ \n");
+   printf("GPU took %lf nanoseconds to run. \n", nanodiff);
    printf("GPU has %0.6f FLOPS \n", flops);
    flops *= pow(10,-6);
    printf("GPU has %0.6f MFLOPS \n", flops);
-   printf("GPU took %lf nanoseconds to run. \n", nanodiff);
 // Verify results.
 bool pass = true;
 

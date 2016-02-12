@@ -1,5 +1,11 @@
 EXE=vector_add
-SRCS=vector_add.cpp
+EXE2 = vector_map
+EXE3 = matrix_cros
+EXE4 = group_matrix_cross
+SRCS=vector_add.cpp 
+SRCS2 = vector_map.cpp
+SRCS3 = matrix_cros.cpp
+SRCS4 = group_matrix_cross.cpp
 GCC=arm-linux-gnueabihf-g++  
 OCLLIBSDIR=/opt/ComputeLibrary/build/
 OCLINCSDIR=/opt/ComputeLibrary/include/
@@ -8,12 +14,30 @@ FLAGS=-g -Wno-deprecated-declarations -Wall -DARCH_ARM -Wextra -Wno-unused-param
 #LDFLAGS=../../build/utils/Utils.o -L../../build/ -L..  -larm_compute -larm_compute_core -lOpenCL
 LDFLAGS=-L${OCLLIBSDIR} -larm_compute -larm_compute_core -lOpenCL
 
-all: ${EXE}
+all: ${EXE} $(EXE2) $(EXE3) $(EXE4) 
 ${EXE}.o:${SRCS}
 	$(GCC) -c ${FLAGS} ${SRCS} -o ${EXE}.o
 
+${EXE2}.o:${SRCS2}
+	$(GCC) -c ${FLAGS} ${SRCS2} -o ${EXE2}.o
+
+${EXE3}.o:${SRCS3}
+	$(GCC) -c ${FLAGS} ${SRCS3} -o ${EXE3}.o
+
+${EXE4}.o:${SRCS4}
+	$(GCC) -c ${FLAGS} ${SRCS4} -o ${EXE4}.o
+
 ${EXE}:${EXE}.o
 	${GCC} -o ${EXE} ${EXE}.o  ${LDFLAGS}
+
+${EXE2}:${EXE2}.o
+	${GCC} -o ${EXE2} ${EXE2}.o  ${LDFLAGS}
+
+${EXE3}:${EXE3}.o
+	${GCC} -o ${EXE3} ${EXE3}.o  ${LDFLAGS}
+
+${EXE4}:${EXE4}.o
+	${GCC} -o ${EXE4} ${EXE4}.o  ${LDFLAGS}
 
 debug:${EXE}
 	LD_PRELOAD=${MGD}/libinterceptor.so ./${EXE}

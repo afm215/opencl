@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <iostream> // for standard I/O
 #include <fstream>
+#include <string>
 #include <CL/cl.h>
 #include <CL/cl_ext.h>
 #define STRING_BUFFER_LEN 1024
@@ -97,10 +98,12 @@ int main()
      int success=clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
 	 if(success!=CL_SUCCESS) print_clbuild_errors(program,device);
      kernel = clCreateKernel(program, "hello", NULL);
-     kernel2 = clCreateKernel(program, "montest", NULL);
+     cl_char message = 'A';
+     kernel2 = clCreateKernel(program, "montest",NULL);
+     clSetKernelArg(kernel2,0, sizeof(cl_char), &message);
      clEnqueueTask(queue, kernel, 0, NULL, NULL);
-     clEnqueueTask(queue, kernel2, 0, NULL, NULL);
-
+     cl_int err = clEnqueueTask(queue, kernel2, 0, NULL, NULL);
+     std::cout << err<< std::endl;
      clFinish(queue);
      clReleaseKernel(kernel);
      clReleaseProgram(program);
