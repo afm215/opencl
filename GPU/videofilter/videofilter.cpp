@@ -4,12 +4,14 @@
 #include <fstream>
 #include <time.h>
 #include "opencv2/opencv.hpp"
+#include "header/clperation.h"
 
 using namespace cv;
 using namespace std;
-#define SHOW
+//#define SHOW
 int main(int, char**)
 {
+	hello();
     VideoCapture camera("./bourne.mp4");
     if(!camera.isOpened())  // check if we succeeded
         return -1;
@@ -31,15 +33,27 @@ int main(int, char**)
     }
 	time_t start,end;
 	double diff,tot;
+	tot = 0;//passing secure flags
 	int count=0;
 	const char *windowName = "filter";   // Name shown in the GUI window.
     #ifdef SHOW
     namedWindow(windowName); // Resizable window, might not work on Windows.
     #endif
+	Mat cameraFrame,displayframe;
     while (true) {
-        Mat cameraFrame,displayframe;
+        
 		count=count+1;
-		if(count > 299) break;
+		if(count > 299) {
+			//std::cout<< "size 0"<<typeof(cameraFrame.size())<<std::endl;
+
+			float *inputtest = (float *) cameraFrame.data;
+			//float *output = (float *) malloc(sizeof(float) * )
+			std::cout<<"input test done with 0 = "<<inputtest[0]<<"and true input in 0"<<cameraFrame.at<float>(0,0)<< std::endl;
+			int a;
+			std::cin >> a;
+			printf("count\n");
+			break;
+		}
         camera >> cameraFrame;
         Mat filterframe = Mat(cameraFrame.size(), CV_8UC3);
         Mat grayframe,edge_x,edge_y,edge,edge_inv;
@@ -65,6 +79,7 @@ int main(int, char**)
 		diff = difftime (end,start);
 		tot+=diff;
 	}
+	//appliedSobel(inputtest, unsigned int size, float *output, float *kernel_mat);	
 	outputVideo.release();
 	camera.release();
   	printf ("FPS %.2lf .\n", 299.0/tot );

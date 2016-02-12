@@ -22,36 +22,35 @@ void print_clbuild_errors(cl_program program,cl_device_id device)
 		exit(1);
 	}
 
-unsigned char ** read_file(const char *name) {
-  size_t size;
-  unsigned char **output=(unsigned char **)malloc(sizeof(unsigned char *));
-  FILE* fp = fopen(name, "rb");
-  if (!fp) {
-    printf("no such file:%s",name);
-    exit(-1);
-  }
+unsigned char** read_file(const char* name) {
+    size_t size;
+    unsigned char** output = (unsigned char**)malloc(sizeof(unsigned char*));
+    FILE* fp = fopen(name, "rb");
+    if (!fp) {
+        printf("no such file:%s", name);
+        exit(-1);
+    }
 
-  fseek(fp, 0, SEEK_END);
-  size = ftell(fp);
-  fseek(fp, 0, SEEK_SET);
+    fseek(fp, 0, SEEK_END);
+    size = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
 
-  *output = (unsigned char *)malloc(size);
-  unsigned char **outputstr=(unsigned char **)malloc(sizeof(unsigned char *));
-  *outputstr= (unsigned char *)malloc(size);
-  if (!*output) {
+    *output = (unsigned char*)malloc(size + 1);
+
+    if (!*output) {
+        fclose(fp);
+        printf("mem allocate failure:%s", name);
+        exit(-1);
+    }
+
+    if (!fread(*output, size, 1, fp)) printf("failed to read file\n");
     fclose(fp);
-    printf("mem allocate failure:%s",name);
-    exit(-1);
-  }
-
-  if(!fread(*output, size, 1, fp)) printf("failed to read file\n");
-  fclose(fp);
-  printf("file size %d\n",size);
-  printf("-------------------------------------------\n");
-  snprintf((char *)*outputstr,size,"%s\n",*output);
-  printf("%s\n",*outputstr);
-  printf("-------------------------------------------\n");
-  return outputstr;
+#ifdef DEBUG
+    printf("%s", *output);
+#endif
+    (*output)[size] = 0;//just in case, but without this line the function will output weird characters on Windows
+    printf("%s", *output);
+    return output;
 }
 void callback(const char *buffer, size_t length, size_t final, void *user_data)
 {

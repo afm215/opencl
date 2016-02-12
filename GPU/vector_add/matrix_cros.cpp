@@ -69,6 +69,7 @@ float rand_float() {
   return float(rand()) / float(RAND_MAX) * 20.0f - 10.0f;
 }
 
+//take the widths of the squared matrixs in parametrs
 int main(int argc, char *argv[])
 {
      char char_buffer[STRING_BUFFER_LEN];
@@ -234,7 +235,7 @@ int errcode;
     status = clSetKernelArg(kernel, argi++, sizeof(cl_mem), &output_buf);
     checkError(status, "Failed to set argument 3");
 
-    status = clSetKernelArg(kernel, argi++, sizeof(cl_mem), &width);
+    status = clSetKernelArg(kernel, argi++, sizeof(int), &width);
     checkError(status, "Failed to set argument 4");
     
     const size_t global_work_size[2] = {width, width};
