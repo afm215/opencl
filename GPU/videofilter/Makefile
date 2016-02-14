@@ -10,7 +10,8 @@ FLAGS=-g -Wno-deprecated-declarations -Wall -DARCH_ARM -Wextra -Wno-unused-varia
 LDFLAGS=-L${OCLLIBSDIR} -larm_compute -larm_compute_core -lOpenCL
 GCC=arm-linux-gnueabihf-g++
 SRCS=./videofilter.cpp
-SRCS2 = ./clperation.cpp
+SRCS2 = ./clperation.cpp ./gpuenv.cpp
+
 all:${EXE}
 ${EXE}: ${SRCS} ${SRCS2}
 	${GCC} ${DBGFLAGS} ${FLAGS}  ${CVINCFLAGS} ${SRCS} ${SRCS2} ${CVLIBFLAGS} -o ${EXE} ${LDFLAGS}
@@ -21,3 +22,6 @@ profile:
 	gprof ./${EXE}  gmon.out > prof.txt
 clean:
 	rm -rf ${EXE} *.o
+
+debug:${EXE}
+	LD_PRELOAD=${MGD}/libinterceptor.so ./${EXE}

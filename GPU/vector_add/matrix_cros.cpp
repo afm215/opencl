@@ -72,6 +72,7 @@ float rand_float() {
 //take the widths of the squared matrixs in parametrs
 int main(int argc, char *argv[])
 {
+      std::cout <<"matrix cross"<<std::endl;
      char char_buffer[STRING_BUFFER_LEN];
      cl_platform_id platform;
      cl_device_id device;
@@ -154,12 +155,6 @@ int errcode;
     nanodiff = finish - beg;
     printf("GPU buffer creation took %lf seconds to run.\n", nanodiff);
 
-    // for(unsigned j = 0; j < N; ++j) {
-	  //     input_a[j] = rand_float();
-	  //     input_b[j] = rand_float();
-	  //     //printf("ref %f\n",ref_output[j]);
-	  //   }
-
     // Transfer inputs to each device. Each of the host buffers supplied to
     // clEnqueueWriteBuffer here is already aligned to ensure that DMA is used
     // for the host-to-device transfer.
@@ -190,7 +185,6 @@ int errcode;
   for(unsigned j = 0; j < N; ++j) {
       input_a[j] = rand_float();
       input_b[j] = rand_float();
-      //printf("ref %f\n",ref_output[j]);
     }
     clock_gettime(CLOCK_REALTIME, &timer);
     finish = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
@@ -207,12 +201,11 @@ int errcode;
           }
           ref_output[j + width * i] = elt;
       }
-    //printf("ref %f\n",ref_output[j]);
   }
   clock_gettime(CLOCK_REALTIME, &timer);
   finish = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
   nanodiff = finish - beg;
-  //printf("Time get %ld \n",finish);
+
   printf("\n");
    printf("\n");
    printf("_______________CPU stats_____________ \n");
@@ -254,12 +247,10 @@ int errcode;
     
     clWaitForEvents(1, &kernel_event);
     
-    // Read the result. This the final operation.
-    //status = clEnqueueReadBuffer(queue, output_buf, CL_TRUE,
-    //     0, N* sizeof(float), output, 1, &kernel_event, &finish_event);
+  
    clock_gettime(CLOCK_REALTIME, &timer);
-   finish = timer.tv_nsec * pow(10,-9) +timer.tv_sec;;
-   //diff = difftime (end,start);
+   finish = timer.tv_nsec * pow(10,-9) +timer.tv_sec;
+   
    nanodiff = finish - beg ;
    flops = (long) N * 6 * width;
    flops /= (nanodiff);
@@ -268,6 +259,7 @@ int errcode;
    printf("_______________GPU stats_____________ \n");
    printf("GPU took %lf seconds to run. \n", nanodiff);
    printf("GPU has %0.6f FLOPS \n", flops);
+
    flops *= pow(10,-6);
    printf("GPU has %0.6f MFLOPS \n", flops);
 // Verify results.
@@ -281,8 +273,10 @@ for(unsigned j = 0; j < N && pass; ++j) {
       }
 }
     // Release local events.
-    clReleaseEvent(write_event[0]);
-    clReleaseEvent(write_event[1]);
+clFinish(queue);
+
+clReleaseEvent(write_event[0]);
+clReleaseEvent(write_event[1]);
 clReleaseKernel(kernel);
 clReleaseCommandQueue(queue);
 clReleaseMemObject(input_a_buf);
@@ -294,12 +288,7 @@ clReleaseContext(context);
 
 //--------------------------------------------------------------------
 
+     
 
-
-
-
-
-     clFinish(queue);
-
-     return 0;
+ return 0;
 }
