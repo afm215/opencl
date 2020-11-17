@@ -72,6 +72,7 @@ int main()
      cl_command_queue queue;
      cl_program program;
      cl_kernel kernel;
+     cl_kernel kernel2;
 
      clGetPlatformIDs(2, &platform, NULL);
      clGetPlatformInfo(platform, CL_PLATFORM_NAME, STRING_BUFFER_LEN, char_buffer, NULL);
@@ -96,7 +97,9 @@ int main()
      int success=clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
 	 if(success!=CL_SUCCESS) print_clbuild_errors(program,device);
      kernel = clCreateKernel(program, "hello", NULL);
+     kernel2 = clCreateKernel(program, "montest", NULL);
      clEnqueueTask(queue, kernel, 0, NULL, NULL);
+     clEnqueueTask(queue, kernel2, 0, NULL, NULL);
 
      clFinish(queue);
      clReleaseKernel(kernel);
