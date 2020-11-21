@@ -12,7 +12,9 @@ The size of the vector is defined by the N function declared in the main functio
 ### TP2 cross matrix
 For this tp be aware that the executable need aruments to run properly:
 Thus launch: 
+
 . "matrix_cross N" where N is a integer nomber to compute the cross product between two squared matrix with size N  
+
 . "group_matrix_cross N M" where N has the same fonction as previously and M is the size of a thread group
 
 It's interesting to notice that fore some M value grouep_matrix_cross is more efficient than matrix_cross and for other it isn't.
