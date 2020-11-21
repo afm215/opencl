@@ -9,6 +9,8 @@ You can check the output of the program in order to cmpare this two situations.
 It appears that Map buffer are more efficient. Please launch the programs if you want more details.
 The size of the vector is defined by the N function declared in the main function of each cpp: vector_add.cpp, vector_map.cpp
 
+The fps are not constant with the size
+
 ### TP2 cross matrix
 For this tp be aware that the executable need aruments to run properly:
 Thus launch: 
@@ -26,6 +28,8 @@ While it's tunning without problem on my device it raises randomly a mali render
 However you can get the output file in the output folder.
 It's of course possible to make this program more optimized by using group of thread and thus increse the performance of the gpu.
 I do not use the Map buffer because my personal device doezs not have a shared memory between the GPU and the CPU.
+
+The performance are in this case influenced by the size of the workgroup which apparently has to be superior ythan the size if the convolution kernel to be efficient.
 
 
 
