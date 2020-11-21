@@ -33,4 +33,5 @@ The performance are in this case influenced by the size of the workgroup which a
 
 It also seems to add stability to the FPS
 
+The gain is not noticeable proabbly due to the fact that opencl sdk is intel's sdk and not nvidia's one. Thus I suppose it's not optimized for nvidia architecture.
 
