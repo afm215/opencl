@@ -33,14 +33,16 @@ It will also crash if M doesn't divide N.
 
 ## video filter
 
-It's again comparing the gpu approach and the cpu one.
+It's again about comparing the gpu approach and the cpu one.
 While it's running without problem on my device it raises randomly a mali rendere error on the school's device.
-However you can get the output file in the output folder.
+I can't understand the origin of this error as for the same program, Friday morning it didn't apppear but it appeared during the evneing each time I launch the program... 
+However you can get the output video file in the output folder.
 
-It's of course possible to make this program more optimized by using group of thread and thus increse the performance of the gpu.
-The performance are in this case influenced by the size of the workgroup which apparently has to be superior than the size if the convolution kernel, to be efficient.
-It also seems to add stability to the FPS
-The gain is however not noticeable proabbly due to the fact that opencl sdk is intel's sdk and not nvidia's one. Thus I suppose it's not optimized for nvidia architecture.
+It's of course possible to make this program more optimized by using group of thread and thus increse the performance of the gpu. 
+The version in this repository doesn't use that but I still made some test. 
+The performance are in this case influenced by the size of the workgroup which apparently has to be superior than the size if the convolution kernel in order to be efficient.
+It also seems to add stability to the FPS.
+The gain is however not noticeable proabbly due to the fact that opencl sdk I use is intel's sdk and not nvidia's one. Thus I suppose it's not optimized for nvidia architecture.
 
 I do not use the Map buffer because my personal device does not have a shared memory between the GPU and the CPU.
 
