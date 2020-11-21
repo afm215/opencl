@@ -1,7 +1,7 @@
 # opencl
-##TP1 &2
+## TP1 &2
 First of all please notice that the makefile will compile all the .cpp which correcpnd, each of them to one exercice.
-###TP1 add vector
+### TP1 add vector
 For this TP the corresponding executable files are vector_add and vector_map.
 They compute the addiition of two vectors randomly generated with the CPU and the GPU.
 You can check the output of the program in order to cmpare this two situations.
@@ -9,7 +9,7 @@ You can check the output of the program in order to cmpare this two situations.
 It appears that Map buffer are more efficient. Please launch the programs if you want more details.
 The size of the vector is defined by the N function declared in the main function of each cpp: vector_add.cpp, vector_map.cpp
 
-###TP2 cross matrix
+### TP2 cross matrix
 For this tp be aware that the executable need aruments to run properly:
 Thus launch: 
 . "matrix_cross N" where N is a integer nomber to compute the cross product between two squared matrix with size N  
