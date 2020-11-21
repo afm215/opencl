@@ -1,5 +1,7 @@
 # opencl
 For each folder make does compile on the scholl device (there is no problem for the make of video filter, you don't need to change it)
+For the video filter I use some useful function to allow comptibility between linux and windows, as weel as between old version of OPENCL and new one.
+Some of this functions are not developped by myself and you can get the origin in comment in the code.
 ## TP1 &2
 First of all please notice that the makefile will compile all the .cpp, each of them corresponding to one exercice.
 ### TP1 add vector
