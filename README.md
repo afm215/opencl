@@ -31,6 +31,6 @@ I do not use the Map buffer because my personal device doezs not have a shared m
 
 The performance are in this case influenced by the size of the workgroup which apparently has to be superior ythan the size if the convolution kernel to be efficient.
 
-
+It also seems to add stability to the FPS
 
 
